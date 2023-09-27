@@ -1,9 +1,9 @@
 import { config } from 'dotenv';
 import { describe } from '@jest/globals';
-import { getPlaceAutocomplete } from '../src/maps-api';
+import { getPlaceAutocomplete, mapTomTomResults } from '../src/maps-api';
 import { getAutoCompleteDetails } from '../src';
 import { AppConfig } from '../src/types';
-import { addressResults } from './test-data';
+import { addressResults, tomtomAddressResult } from './test-data';
 
 config();
 
@@ -72,12 +72,26 @@ describe('Tomtom Places E2E Tests', () => {
             expect(res[0].country).toStrictEqual('Australia');
         });
 
-        it('handles error', async () => {
+        it('handles not a real address', async () => {
+            const fakeAddress = '!!%*^&%#$(&^';
+            expect(getPlaceAutocomplete(config.apiKey, fakeAddress)).rejects.toThrow('failed to retrieve data');
+        });
+
+        it('handles error when no address is passed', async () => {
             expect(getPlaceAutocomplete(config.apiKey, '')).rejects.toThrow('Address is required');
+        });
+
+        it('handles error when no api key is passed', async () => {
+            const localAddress = '1 Nicholson Street Melbourne';
+            expect(getPlaceAutocomplete('', localAddress)).rejects.toThrow('API key is required');
         });
 
         it('handles incorrect api key', async () => {
             expect(getPlaceAutocomplete('123', 'Charlotte Street')).rejects.toThrow();
+        });
+        it('should map results to AutoCompleteAddressResponse', async () => {
+            const results = await mapTomTomResults(tomtomAddressResult);
+            expect(results).toEqual([addressResults]);
         });
     });
 });

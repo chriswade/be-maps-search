@@ -2,6 +2,7 @@
 export interface TomTomAddressResult {
     type: string;
     id: string;
+    score: number,
     address: TomTomAddress;
 }
 
